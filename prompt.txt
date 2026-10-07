@@ -1,0 +1,381 @@
+Haan, bilkul ban sakta hai
+Jo aapne bataya, woh sab bina server ke ho sakta hai. Mera suggested plan neeche hai.
+
+Tech choice (meri recommendation)
+Cheez	Kya use karenge	Kyun
+App	Flutter Android app (APK)	Phone pe install hoga, offline chalega, bade buttons wala simple UI ban sakta hai
+Local storage	SQLite (phone ke andar)	Internet ke bina bhi bills banenge aur history dikhegi
+Cloud backup	Google Drive (dad ka apna Google account, 15 GB free)	Folders seedhe Drive mein dikhenge. Firebase ki free file storage ab card/billing maangti hai, isliye Drive behtar hai
+Login	4–6 digit PIN + fingerprint	Dad ke liye password type karne se aasaan
+Features
+Bill banana: aapki billbook jaisa hi format (logo, design, layout sab same). Bill number apne aap aage badhega.
+Auto calculation: Quantity × Rate se har line ka amount, aur phir total, GST (agar lagta ho) aur grand total apne aap aayega.
+Party auto-fill: "Hundred Clothings" jaise party ka naam type ya select karte hi address aur GSTIN apne aap bhar jayega.
+Edit: purana bill khol ke badal sakte hain, aur PDF dobara ban jayegi.
+Download / Share: PDF save karna, ya seedha WhatsApp pe bhejna.
+✔ Tick: bill de diya ya payment mil gaya, ek tap se mark ho jayega. Pending aur done bills alag filter ho jayenge.
+History: saare bills, party ya month ke hisaab se search.
+Auto folders (phone aur Drive dono mein):
+
+2026/
+  10-October/
+    Hundred Clothings/
+      2026-10-07_Bill-0123.pdf
+ITR / documents: dad WhatsApp ya Gallery se koi file "Share → Bill App" karenge, toh woh 2026/Documents/ITR/ jaise folder mein save ho jayegi.
+Easy UI: bade buttons, icons ke saath, Hindi labels, kam se kam typing.
+Shuru karne se pehle mujhe yeh chahiye
+Bill ka photo (saaf, seedha, poora page). Agar ho sake toh ek khaali bill aur ek bhara hua bill, dono ka photo.
+Logo ka achha quality wala image, agar hai toh.
+Dad ke paas Android hai ya iPhone? (Maine Android maan ke plan kiya hai.)
+App ki bhasha: Hindi, Marathi ya English?
+Bill mein GST lagta hai? Agar haan, toh CGST+SGST, IGST, ya dono?
+Bill number ka format kya hai? Jaise 123, ya 2026-27/123? Kya har financial year mein number phir se 1 se shuru hota hai?
+Aapke computer pe Flutter / Android Studio install hai? Nahi hai toh main setup karwa dunga.
+Photo aur yeh jawab bhej do. Phir main project banana shuru karunga, sabse pehle bill ka PDF exactly aapki billbook jaisa banaunga, taaki aap pehle design check kar sako.
+
+
+
+i want ki koi bhi yeh app chalasake . like agr uska bill different huwa toh woh just photo bhejega bill ka , and uske liye woh format banjaye
+3:39 PM
+Haan, ho sakta hai, lekin ek cheez badalni padegi
+"Photo bhejo, format apne aap ban jaye" ke liye AI (vision model) chahiye, jo photo dekh ke samjhe ki header kahan hai, columns kaunse hain, logo kaunsa hai, GST box kahan hai. Yeh kaam phone pe akele theek se nahi ho paata. Isliye bilkul zero server wali condition thodi dheeli karni padegi.
+
+Kaise kaam karega
+
+User bill ka photo leta hai
+        ↓
+App photo ko AI (Claude) ko bhejta hai
+        ↓
+AI ek "template" (JSON) wapas deta hai:
+  - Dukaan ka naam, address, GSTIN, phone
+  - Columns: Sr | Item | HSN | Qty | Rate | Amount
+  - Colors, fonts, borders, kaunsa box kahan hai
+  - Logo (photo se crop karke)
+        ↓
+App preview dikhata hai → user "Haan, sahi hai" dabata hai
+(ya chhota-mota badlav: naam, color, column)
+        ↓
+Uss template se bills bante hain (Qty × Rate auto)
+Ek baat seedhi bata deta hoon: photo se pehli baar mein lagbhag 80–90% sahi design banega. Baaki ke liye ek simple "Template theek karo" screen rakhenge. Har bill 100% exact copy ho jaye, iski guarantee AI se nahi milti.
+
+"Server" ka matlab yahan
+AI ki API key app ke andar nahi rakh sakte, warna koi bhi nikal ke use kar lega aur bill aapko bharna padega. Isliye ek chhota sa free proxy chahiye:
+
+Cloudflare Worker (free tier): lagbhag 30 lines ka code, koi maintenance nahi, koi database nahi
+Iska kaam bas photo ko AI tak pahunchana hai, kisi ka data yahan store nahi hota
+Saara data har user ke apne phone + apne Google Drive mein rahega, aapke paas kuch nahi aayega
+AI ka kharcha sirf template banate waqt lagega, matlab har user ko ek baar (photo per kuch rupaye se kam). Roz bill banane mein AI ka koi kharcha nahi.
+
+Sabke liye app = kuch extra kaam
+Play Store pe daalna (Google ka ek baar ka developer fee, privacy policy page)
+Har user ka alag PIN aur alag Google Drive
+Pehli baar app kholne pe setup: photo lo → template confirm karo → PIN set karo → Drive connect karo
+Proxy pe abuse rokne ke liye limit, jaise ek phone se din mein 5 template
+Meri recommendation: 2 phase mein banate hain
+Phase 1 – Dad ke liye (2–3 hafte ka kaam)
+Pehle se hi app ko "template system" pe banayenge, yaani bill ka design hard-code nahi hoga, JSON template se banega. Dad ka template main khud aapke photo se bana dunga. Bills, history, tick, folders, Drive, ITR share, sab yahin ho jayega.
+
+Phase 2 – Sabke liye
+Photo → AI → template wala feature, Cloudflare proxy, onboarding, aur Play Store.
+
+Is tarah dad ko jaldi app mil jayegi, aur Phase 2 mein app ka core dobara likhna nahi padega.
+
+Phase 1 se shuru karein? Agar haan, toh pichle message ke saare cheezein bhej do: bill ka photo (khaali aur bhara hua, dono), logo, phone Android hai ya iPhone, bhasha, GST ka type, bill number ka format, aur aapke PC pe Flutter install hai ya nahi.
+
+
+
+nhi hum khudh chota ek vision model app ko dedenge
+3:40 PM
+Theek hai, on-device model se bhi ho sakta hai. Ab poora app bina server ke chalega.
+Yeh possible hai, bas kuch limits pehle samajh lo, phir tareeka batata hoon.
+
+Asli dikkatein
+Dikkat	Kya matlab hai
+Model ka size	Kaam ka chhota vision model bhi lagbhag 1.5–3 GB ka hota hai. APK ke andar nahi jaayega, setup ke waqt alag se download karna padega (Wi-Fi pe, ek baar).
+Phone ki taakat	Kam se kam 6 GB RAM wala phone chahiye. Purane ya saste phone pe crash ya bahut slow ho sakta hai.
+Speed	Ek photo samajhne mein 30 sec – 2 min. Yeh kaam ek hi baar hota hai, isliye chalega.
+Accuracy	Bade cloud model se kam. Chhota model akele photo dekh ke poora design exact nahi bana paayega.
+Isliye sirf model pe nahi chhodenge, 4 tools milke kaam karenge
+
+Photo
+  │
+  ├─► 1. Google ML Kit OCR (on-device, free, chhota)
+  │      → saara text + har text kahan hai (position)
+  │
+  ├─► 2. OpenCV
+  │      → table ki lines, boxes, borders, colors
+  │
+  ├─► 3. Chhota vision model (jaise Gemma 3n E2B)
+  │      → OCR ka text + boxes dekh ke batata hai:
+  │        "yeh dukaan ka naam hai, yeh GSTIN hai,
+  │         yeh columns hain: Item | Qty | Rate | Amount"
+  │      → output: template JSON
+  │
+  └─► 4. User confirm karta hai
+         → logo ke upar ungli se box kheencho (crop)
+         → galat field ko tap karke theek karo
+Is setup mein model ka kaam sirf fields ko pehchaanna hai, design OCR + OpenCV se aata hai. Chhota model yeh kaam achhe se kar leta hai.
+
+Kamzor phone ke liye backup
+Agar phone mein model nahi chal sakta, toh "Khud banao" wizard khulega:
+
+Header style chuno (3–4 ready designs)
+Dukaan ka naam, address, GSTIN bharo (OCR se apne aap bhar jaayega)
+Columns pe tick karo (Item, HSN, Qty, Rate, Amount...)
+Logo ki photo lo
+Yeh har phone pe chalega aur bina model ke bhi 80% kaam kar dega.
+
+Plan wahi rahega, bas Phase 2 badla
+Phase 1 – Dad ke liye: template-based bill app, history, tick, auto folders, Google Drive, ITR share, PIN. Dad ka template main aapke photo se bana dunga.
+Phase 2 – Sabke liye: on-device photo → template (OCR + OpenCV + chhota model + confirm screen), backup wizard, Play Store.
+Phase 2 se pehle main 2–3 chhote models ko aapke asli bill photo pe test karunga aur jo sabse achha aur halka nikle, wahi lenge.
+
+Ab bas yeh bhejna baaki hai:
+
+Bill ka photo (khaali aur bhara hua, dono)
+Logo
+Phone: Android ya iPhone, aur kitni RAM hai
+Bhasha
+GST ka type
+Bill number ka format
+Aapke PC pe Flutter install hai ya nahi
+
+
+haan i mean woh one time process hai na, kaha mere dad ko baar baar alag bill banana hoga
+3:41 PM
+Haan, bilkul sahi. Yeh sirf ek baar ka kaam hai.
+
+Pehli baar (sirf ek baar):
+  Bill ki photo → template ban gaya → confirm → save ✔
+
+Uske baad roz:
+  Party chuno → items, qty, rate daalo → total apne aap → PDF ✔
+  (yahan model ka koi kaam nahi, ekdum fast)
+Isse ek aur fayda hai:
+
+Template banne ke baad model phone se delete kar denge, taaki 1.5–3 GB jagah wapas mil jaaye.
+Roz ka app halka rahega (~30–50 MB) aur purane phone pe bhi tez chalega.
+Kabhi naya bill design chahiye ho (jaise dukaan ka naya letterhead), tab model phir se download ho jaayega.
+Aur dad ke liye toh model ki zaroorat hi nahi. Unka template main pehle se bana ke app mein daal dunga. Unke liye app kholo, PIN daalo, bill banao, itna hi.
+
+Ab shuru karne ke liye bill ka photo bhej do (khaali aur bhara hua, dono), saath mein logo, aur yeh bata do: phone Android hai ya iPhone, bhasha kaunsi chahiye, GST ka type kya hai, bill number ka format kya hai, aur PC pe Flutter install hai ya nahi.
+
+
+
+what if agr naya bill agya toh
+3:41 PM
+Naya bill design aaya toh bhi koi dikkat nahi
+App mein ek se zyada templates rakh sakte hain.
+
+Naya design kaise jodenge
+
+Settings → "Naya bill design jodo" → photo lo
+   ↓
+Model download hoga (Wi-Fi pe, ek baar)
+   ↓
+Naya template bana → confirm → save
+   ↓
+Model phir se delete (jagah wapas)
+Purane bills ka kya hoga?
+Har bill ko yaad rahega ki woh kis design se bana tha.
+Purane bills purane design mein hi khulenge, download honge aur edit honge, kuch nahi bigdega.
+Naye bills naye design se banenge.
+Dad chahein toh "Default design" chun sakte hain, ya bill banate waqt design badal sakte hain (jaise do dukaan ya do firm hon).
+Chhota badlav ho toh model ki zaroorat nahi
+Address, phone number, GSTIN ya logo badla hai? Toh Settings → "Design edit karo" se seedha badal do. Model download karne ki zaroorat nahi.
+
+Agar matlab tha: kisi aur ka bill aaya (supplier ka bill)
+Woh bhi ho jaayega. WhatsApp ya Gallery se Share → Bill App karo, aur woh 2026/10-October/Received Bills/<Party name>/ folder mein apne aap save ho jaayega, ITR ki tarah.
+
+Shuru karne ke liye ab sirf bill ka photo chahiye (khaali aur bhara hua). Saath mein woh baaki details bhi bhej dena: logo, phone, bhasha, GST ka type, bill number ka format, aur PC pe Flutter install hai ya nahi.
+
+
+
+haan but hum model ko zip mein nhi rakhsakte kya, like vision model fine tune karke 100MB , ya 50MB ka sirf designs ke liye specific nhi banasakte kya
+3:43 PM
+Haan, ban sakta hai, aur yeh behtar idea hai
+Bas ek cheez saaf kar doon: zip karne se model chhota nahi hota, kyunki model ke weights pehle se compressed jaise hote hain. Size chhota hota hai chhota model chunne aur quantize (int8) karne se.
+
+Hamein poora "baat karne wala" vision model chahiye hi nahi. Hamara kaam bahut specific hai: bill mein kaunsa box kya hai, yeh pehchaanna. Iske liye ek chhota object-detection model kaafi hai.
+
+Naya setup: poora APK ke andar, ~20–40 MB
+Hissa	Kaam	Size
+YOLO nano (fine-tuned, int8)	Bill mein boxes dhoondhe: logo, dukaan ka naam, address, GSTIN, party box, item table, column headers, total, signature, terms	~5–12 MB
+Google ML Kit OCR	Har box ke andar ka text padhe (English + Hindi)	~10–20 MB
+Rules (code)	GSTIN pattern (15 akshar), phone, date, "Qty/Rate/Amount" jaise shabd pehchaane	~0
+OpenCV	Table ki lines, borders, colors	~10 MB
+Isse download ki zaroorat nahi, delete ki bhi nahi, aur purane phone pe bhi kuch second mein ho jaayega.
+
+Training data kahan se aayega (yahan ek trick hai)
+Hamara app khud bills banata hai, toh woh khud hi training data bana sakta hai:
+
+Synthetic bills (hazaaron): apne template engine se alag-alag design ke bills generate karenge, alag fonts, colors, columns aur layouts ke saath. Har box ki position code ko pehle se pata hai, toh labels free mein mil jaate hain.
+Asli photos (~150–300): dukaano se alag-alag billbooks ke photo. Inko Roboflow ya Label Studio (free) mein haath se label karenge, taaki model tedhi photo, kam roshni aur kaagaz ki texture bhi samjhe.
+Training: Google Colab (free GPU) pe kuch ghante.
+Limit (seedhi baat)
+Model boxes aur fields achhe se pakdega.
+Exact font pehchaanna mushkil hai, isliye 8–10 fonts mein se sabse milta-julta chunenge.
+Isliye last mein "Sahi hai?" confirm screen rahegi, jahan user ek tap mein galti theek kar sake.
+Plan (update)
+Phase 1 – Dad ka app: template engine, bills, history, tick, folders, Drive, ITR share, PIN
+Phase 2 – Detector: synthetic data generator (Phase 1 ke template engine se), asli photos ka labeling, YOLO training, phone pe test
+Phase 3 – Sabke liye: onboarding, confirm screen, Play Store
+Phase 1 ka template engine hi Phase 2 ka data generator banega, isliye pehle wahi achha banana zaroori hai.
+
+Toh ab shuru karte hain. Dad ka bill ka photo bhej do (khaali aur bhara hua). Saath mein logo, phone (Android ya iPhone, kitni RAM), bhasha, GST ka type, bill number ka format, aur PC pe Flutter hai ya nahi, yeh bhi bata dena.
+
+
+
+
+image.jpeg
+1368×1999
+
+image.png
+621×722
+aise type mein hosakte hai
+3:46 PM
+Haan, dono type ek hi template system se ban jaayenge
+Dono bills alag dikhte hain, lekin andar se ek jaisi cheezon se bane hain. Template engine ko inhi hisson ko support karna hai:
+
+Hissa	Kamini Textile	Gujarat Freight Tools
+Header	Naam, tagline, address, GSTIN, phone	Naam, rangeen tagline patti, logo, web, email
+Right side ke fields	Challan No, Date, GR No, Vehicle, Transport, State, State Code, Place of Supply	Challan No, Date, L.R. No, E-Way No, Transport, Vehicle
+Party box	M/s, address, GSTIN, PAN	M/S, Address, Phone, GSTIN, Place of Supply
+Item table	Style No, S, M, L, XL, XXL, Qty, Unit, Total	Sr, Item, HSN, Qty, Rate, Taxable, CGST % / Amt, SGST % / Amt, Total
+Neeche ka hissa	Total row	Total row, amount in words, terms, tax summary, signature
+Columns mein formula
+Har column ka apna formula hoga, isliye koi bhi design chal jaayega:
+
+
+"columns": [
+  {"id": "style", "label": "STYLE NO.", "type": "text"},
+  {"id": "s",  "label": "S",   "type": "number", "group": "sizes"},
+  {"id": "m",  "label": "M",   "type": "number", "group": "sizes"},
+  {"id": "l",  "label": "L",   "type": "number", "group": "sizes"},
+  {"id": "xl", "label": "XL",  "type": "number", "group": "sizes"},
+  {"id": "xxl","label": "XXL", "type": "number", "group": "sizes"},
+  {"id": "qty",  "label": "QTY.",  "formula": "s+m+l+xl+xxl"},
+  {"id": "rate", "label": "UNIT",  "type": "number"},
+  {"id": "total","label": "TOTAL", "formula": "qty*rate"}
+]
+GST wale bill mein cgst_amt = taxable * cgst% / 100 jaise formule honge, aur "Total in words" bhi apne aap likha jaayega.
+
+Dad ke liye form: bill jaisa nahi, aasaan
+Dad ko yeh chhote-chhote khaane bharne nahi padenge. Form bade-bade dabbon mein hoga:
+
+
+┌───────────────────────────┐
+│  Party:  [Hundred Clothing ▼] │  ← history se chuno
+│  Style No: [ 1023      ]  │
+│  S [10] M [20] L [15] XL [5] XXL [0] │
+│  Qty: 50  (apne aap)       │
+│  Rate: [ 120 ]             │
+│  Total: ₹ 6,000  (apne aap) │
+│  [ + Aur item ]            │
+│                            │
+│  [ ✔ Bill banao ]          │
+└───────────────────────────┘
+PDF bilkul photo wale design mein banegi.
+
+Kuch sawaal
+Kamini Textile wala bill dad ka hai? Ya dono sirf example hain? Agar dad ka hai, toh uski saaf, seedhi, high-quality photo bhejo. Abhi wali chhoti aur dhundhli hai, exact copy ke liye kaafi nahi.
+Kamini bill mein "UNIT" column ka matlab rate per piece hai, ya PCS/DOZEN jaisi unit? Dad ke hisaab se Qty × Rate = Total hona chahiye, toh rate kahan likhte hain?
+Yeh Delivery Challan hai. Dad ko Tax Invoice (GST wala) bhi banana hota hai, ya sirf challan?
+Phone Android hai ya iPhone? PC pe Flutter install hai ya nahi?
+In sawaalon ke jawab aa jaayein, toh main Phase 1 shuru kar dunga: pehle template engine aur Kamini bill ki PDF, taaki aap design check kar sako.
+
+
+
+yeh sirf example hai
+PowerShell Check which dev tools are installed
+IN
+foreach ($c in 'flutter','dart','java','adb','git','node','python') { $p = Get-Command $c -ErrorAction SilentlyContinue; if ($p) { "$c : $($p.Source)" } else { "$c : NOT FOUND" } }; Get-ChildItem -Force | Select-Object Name
+
+OUT
+flutter : NOT FOUND
+dart : NOT FOUND
+java : NOT FOUND
+adb : NOT FOUND
+git : C:\Users\ShubhamParande\AppData\Local\Programs\Git\cmd\git.exe
+node : C:\Program Files\nodejs\node.exe
+python : C:\Users\ShubhamParande\AppData\Local\Programs\Python\Python313\python.exe
+
+Name                                  
+----                                  
+Dynamic_CRM_Sales_Agents_Orchestration
+venv                                  
+MASAA Paper Research.pdf              
+sales_agent.db
+3:47 PM
+Theek hai. Toh in dono ko test templates bana ke kaam shuru kar sakte hain.
+Dad ka asli bill baad mein aayega, tab uska template bana denge. Engine ek hi hai, toh koi kaam bekaar nahi jaayega. Yeh dono examples asal mein achhe test hain, kyunki ek mein size wale columns hain aur doosre mein GST wale columns.
+
+Aapke PC mein abhi kya hai
+Tool	Status
+Git, Node.js, Python	✔ Installed hai
+Flutter, Android SDK, Java	✘ Nahi hai
+App banane ke liye pehle Flutter + Android Studio install karna padega. Download lagbhag 3–5 GB ka hai aur install mein 30–60 minute lagte hain.
+
+Main kya karunga (aapki permission ke baad)
+Setup: Flutter, Android Studio, Java install karke check karunga ki sab chal raha hai
+Project banaunga: bill_app/ folder mein
+Template engine: JSON template se PDF banane wala code
+Dono example templates: Kamini Textile aur Gujarat Freight Tools, jinki PDF aap photo se milaa ke check kar sakte ho
+Bill form: party chuno, items daalo, total apne aap
+Phir history, tick, folders, Drive, PIN, ITR share
+Mujhe aapse yeh chahiye
+Flutter install karne ki permission de do. Aap khud karna chaho toh main steps bata dunga.
+Aapke paas Android phone hai jo USB se jod sakein (testing ke liye)? Nahi hai toh PC pe emulator chala lenge.
+Dad ka asli bill jab mile, uski saaf photo bhej dena.
+Bolo "haan, install karo", toh main setup shuru kar dunga.
+
+
+
+apn yeh raat ko mere laptop pe karenge
+Write C:\Users\ShubhamParande\.claude\projects\c--Users-ShubhamParande-Downloads-personal\memory\bill-app-for-dad.md
+18 lines
+---
+name: bill-app-for-dad
+description: Planned Flutter billing/challan app for user's dad (template-based bills, history, Drive folders, on-device bill-photo→template model); setup not started yet
+metadata:
+  type: project
+---
+
+User (writes in Hinglish) wants an Android app for their dad (not very literate → very simple UI, big buttons, Hindi labels) to replace the physical billbook. Planned 2026-10-07; setup to be done "tonight" on the user's own laptop (not this work PC, which lacks Flutter/Android SDK/Java).
+
+Agreed decisions:
+- Flutter Android app, no server. Local SQLite + dad's Google Drive (drive.file scope). PIN + fingerprint auth.
+- Bills rendered from a JSON template (columns with formulas, e.g. qty = s+m+l+xl+xxl, total = qty*rate, CGST/SGST). Multiple templates; each bill remembers its template.
+- Features: create/edit/download/share PDF, tick bill as delivered/paid, history, party auto-fill (name/address/GSTIN), auto folders YYYY/MM-Month/<Party>/date_Bill-N.pdf, share-to-app for ITR/received bills.
+- Phase 1: dad's app (dad's template hand-made). Phase 2: on-device photo→template using fine-tuned YOLO-nano (int8, ~5–12 MB) + ML Kit OCR + OpenCV + rules, trained on synthetic bills generated by the template engine + ~150–300 real labeled photos. Phase 3: onboarding/confirm screen/Play Store for anyone.
+- Test templates: two example delivery challans the user shared (Kamini Textile & Fabricator — size columns; Gujarat Freight Tools — GST columns). Dad's real bill photo still pending.
+
+Open questions: dad's real bill photo, phone/RAM, UI language, GST type, bill-number format, meaning of "UNIT" column, challan vs tax invoice.
+Write C:\Users\ShubhamParande\.claude\projects\c--Users-ShubhamParande-Downloads-personal\memory\MEMORY.md
+2 lines
+- [Bill app for dad](bill-app-for-dad.md) — planned Flutter billing app: decisions, phases, open questions
+3:48 PM
+Theek hai, raat ko laptop pe karte hain. 👍
+
+Abhi tak jo plan bana hai, woh maine is PC ki memory mein save kar diya hai. Lekin laptop pe main nayi session mein hounga aur yeh baatcheet mujhe yaad nahi rahegi. Isliye raat ko shuru karte waqt neeche wala message copy karke paste kar dena:
+
+
+Bill app for dad – plan:
+- Flutter Android app, no server. SQLite + dad's Google Drive. PIN + fingerprint.
+- Bills JSON template se bante hain (column formulas: qty = S+M+L+XL+XXL, total = qty*rate, CGST/SGST).
+  Ek se zyada templates; har bill ko yaad rahe ki woh kis template se bana.
+- Features: bill banao/edit/PDF download/WhatsApp share, ✔ tick (de diya/paisa mila), history,
+  party auto-fill (naam/address/GSTIN), auto folders 2026/10-October/<Party>/<date>_Bill-N.pdf,
+  ITR aur doosre bills "Share → App" se folder mein save.
+- Bahut simple UI: bade buttons, Hindi.
+- Phase 1: dad ka app. Phase 2: photo → template (YOLO-nano int8 + ML Kit OCR + OpenCV,
+  synthetic bills se training). Phase 3: sabke liye + Play Store.
+- Test templates: Kamini Textile (size columns) + Gujarat Freight Tools (GST) – photos phir se bhejunga.
+- Pehla step: Flutter + Android Studio + Java install karo, phir project + template engine.
+Raat ke liye taiyaari
+ Laptop pe 8–10 GB jagah khaali ho
+ Achha Wi-Fi ho (3–5 GB download)
+ Android phone + USB cable, aur phone mein Developer Options → USB Debugging ON
+ Dono example bills ki photos phir se bhejna
+ Dad ka asli bill mil jaye toh uski saaf photo
+Raat ko milte hain. 🙂
